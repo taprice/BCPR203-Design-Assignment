@@ -1,0 +1,56 @@
+-- use hospital
+select * from patient;
+select * from surgeon;
+select * from booking;
+select * from referral;
+select * from department;
+
+
+-- Q1 How many people have been referred for surgery?
+select count(*) as 'Referral Count'
+from referral
+where HTEligible = "Yes" or HTEligible = "yes";
+
+-- Q2 What is the average time taken to see a Surgeon by Department?
+select department.deptName as Department, CAST(avg(Booking.daysWaiting) as DECIMAL (12,0)) as 'Average Time taken to see surgeon'
+from booking
+inner join referral on referral.refId = booking.refId
+inner join surgeon on surgeon.surgeonId = referral.surgeonId
+inner join department on department.deptCode = surgeon.deptCode
+where referral.HTEligible = "Yes" or referral.HTEligible = "yes"
+group by deptName;
+
+-- Q3 Who has each Surgeon had on their list and how long have they been waiting or did they wait?
+select concat(surgeon.sFirstName, " ", surgeon.sLastName) as Surgeon, 
+concat(patient.pFirstName, " ", patient.pLastName) as patient,
+Booking.daysWaiting
+from patient
+inner join referral on patient.patientNo = referral.patientNo
+inner join surgeon on referral.surgeonId = surgeon.surgeonId
+inner join booking on booking.refId = referral.refId
+where (referral.HTEligible = "Yes" or referral.HTEligible = "yes")
+order by Surgeon.sLastName;
+
+-- Q4. Assuming that all patients under 18 need to be seen by Paediatric Surgery, 
+-- are there any patients who need to be reassigned?
+select patient.patientNo, concat(patient.pFirstName, " ", patient.pLastName) as patient,
+referral.ageAtRef, department.deptName
+from patient
+inner join referral on patient.patientNo = referral.patientNo
+inner join surgeon on surgeon.surgeonId = referral.surgeonId
+inner join department on department.deptCode = surgeon.deptCode
+where (referral.HTEligible = "Yes" or referral.HTEligible = "yes") and 
+referral.ageAtRef < 18 and department.deptCode != "paed";
+
+-- Q5 What percentage of patient were seen within the target of 80 days by department?
+select department.deptName as Department, 
+-- count(referral.refId),
+-- count(booking.daysWaiting < 80),
+cast(count(booking.daysWaiting  < 80) / count(referral.refId) * 100 as DECIMAL (6,0)) 
+AS '% seen within target'
+from department
+inner join surgeon on surgeon.deptCode = department.deptCode
+inner join referral on referral.surgeonId = surgeon.surgeonId
+inner join booking on booking.refId = referral.refId
+where (referral.HTEligible = "Yes" or referral.HTEligible = "yes")
+group by department.deptName;
