@@ -1,0 +1,131 @@
+-- create Database
+create database Hospitalv3;
+-- Default DB
+use Hospitalv3;
+
+-- set the auto_increment value to 3
+SET @@auto_increment_increment=3;
+
+-- create Patient table
+CREATE TABLE Patient (
+    patientNo INT NOT NULL AUTO_INCREMENT,
+    NHI char(8),
+    pFirstName varchar(50),
+    pLastName varchar(60),
+    DOB DATE,
+    gender VARCHAR(8),
+    PRIMARY KEY (patientNo)
+);
+
+-- Load external file into patient table
+load data local infile 'D:/data/patient.csv'
+into table patient
+fields terminated by ','
+(NHI, pFirstName, pLastName, DOB, gender);
+
+-- select * from patient;
+
+CREATE TABLE Department (
+    deptCode CHAR(4),
+    deptName VARCHAR(20),
+    PRIMARY KEY (deptCode)
+);
+
+-- Load external file into department table
+load data local infile 'D:/data/department.csv'
+into table department
+fields terminated by ',';
+
+-- select * from department;
+
+CREATE TABLE Surgeon (
+    surgeonId INT NOT NULL AUTO_INCREMENT,
+    sFirstName VARCHAR(25),
+    sLastName VARCHAR(30),
+    deptCode CHAR(4),
+    PRIMARY KEY (surgeonId),
+    FOREIGN KEY (deptCode)
+        REFERENCES Department (deptCode)
+);
+
+-- Load external file into surgeon table
+load data local infile 'D:/data/surgeon.csv'
+into table surgeon
+fields terminated by ','
+(sFirstName, sLastName, deptCode);
+
+-- select * from surgeon;
+
+-- set the auto_increment value to 3
+SET @@auto_increment_increment=4;
+
+CREATE TABLE Referral (
+    refId INT NOT NULL AUTO_INCREMENT,
+    refDate DATE,
+    refFrom VARCHAR(20),
+    refBy VARCHAR(50),
+    waitlistDate DATE,
+    HTEligible VARCHAR(4),
+    patientNo INT,
+    ageAtRef INT,
+    surgeonId INT,
+    NHI VARBINARY(25),
+    sLastName VARCHAR(30),
+    FSADate DATE,
+    PRIMARY KEY (refId),
+    FOREIGN KEY (patientNo)
+        REFERENCES Patient (patientNo),
+    FOREIGN KEY (surgeonId)
+        REFERENCES Surgeon (surgeonId)
+);
+
+-- Load external file referral table
+load data local infile 'D:/data/referral.csv'
+into table referral
+fields terminated by ','
+(refDate, refFrom, refBy, waitlistDate, HTEligible, NHI, sLastName, FSADate);
+
+-- select * from referral;
+
+-- Update patientNo in the referral table
+UPDATE patient, referral 
+SET referral.patientNo = patient.patientNo
+WHERE referral.NHI = patient.NHI;
+
+-- Update SurgeonId in the referral table
+UPDATE surgeon, referral 
+SET referral.surgeonId = surgeon.surgeonId
+WHERE surgeon.sLastName = referral.sLastName;
+
+-- Update ageAtReferral in the referral table
+UPDATE referral, patient 
+SET referral.ageAtRef = TIMESTAMPDIFF(YEAR, Patient.DOB, referral.refDate)
+WHERE referral.patientNo = patient.patientNo;
+
+-- create booking table from referral so that the 
+-- referral No, FSA Date imported together.
+CREATE TABLE Booking 
+AS SELECT FSADate, refId 
+FROM referral;
+
+-- set the auto_increment value to 3
+SET @@auto_increment_increment=7;
+
+-- Alter booking table to include primary key,
+-- calculate daysWaiting and make redId foreign key
+Alter table Booking
+add bookingId INT NOT NULL AUTO_INCREMENT primary Key;
+Alter table Booking 
+add  daysWaiting INT;
+ALTER TABLE Booking
+ADD FOREIGN KEY (refId) REFERENCES Referral(refId);
+
+-- Update days waiting at booking table
+UPDATE booking, referral 
+SET booking.daysWaiting = TIMESTAMPDIFF(DAY, referral.refDate, booking.FSADate)
+WHERE booking.refId = Referral.refId;
+
+-- These columns were created to assist import data, can now be dropped
+ALTER TABLE referral DROP COLUMN NHI;
+ALTER TABLE referral DROP COLUMN sLastName;
+ALTER TABLE referral DROP COLUMN FSADate;
