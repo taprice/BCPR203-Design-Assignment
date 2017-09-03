@@ -1,0 +1,71 @@
+-- create database
+create database Hospitalv2;
+-- Default DB
+use Hospitalv2;
+
+-- create patient table
+create table Patient(
+patientNo int NOT NULL AUTO_INCREMENT,
+NHI char(7),
+pFirstName varchar(25),
+pLastName varchar(30),
+DOB date,
+gender varchar(8),
+PRIMARY KEY (patientNo)
+);
+
+/* Patient table was created without encryption 
+to enable data to be entered into other tables from csv. 
+NHI, first name, last name, DOB,  will be encrypted once all data imported. */
+
+-- set the auto_increment value to 10
+SET @@auto_increment_increment=10;
+
+-- create department table
+create table Department(
+deptCode int NOT NULL AUTO_INCREMENT,
+deptName varchar(20),
+PRIMARY KEY (deptCode)
+);
+
+-- create surgeon table
+create table Surgeon(
+surgeonId int NOT NULL AUTO_INCREMENT,
+sFirstName varchar(25),
+sLastName varchar(30),
+deptCode int,
+PRIMARY KEY (surgeonId),
+foreign key (deptCode) references
+Department(deptCode)
+);
+
+-- create referral table
+create table Referral(
+refId int NOT NULL AUTO_INCREMENT,
+refDate date,
+refFrom varchar(20),
+refBy	varchar(50),
+waitlist date,
+patientNo int,
+surgeonId int,
+PRIMARY KEY (refId),
+-- foreign keys 
+foreign key (patientNo) references
+Patient(patientNo),
+foreign key (surgeonId) references
+Surgeon(surgeonId)
+);
+
+-- create booking table
+create table Booking(
+bookingID int NOT NULL AUTO_INCREMENT,
+FSADate date,
+daysWaiting int,
+refId int,
+ageAtRef int,
+HTEligible varchar(3),
+PRIMARY KEY (bookingID),
+-- foreign keys
+foreign key (refId) references
+Referral(refId)
+);
