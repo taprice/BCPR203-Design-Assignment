@@ -1,0 +1,20 @@
+-- Insert test data
+Insert into  Patient Values (6001, 'QDX4955', 'Maggie', 'Boyle', '12/09/1979', 'FEMALE');
+Insert into  Patient Values (6002, 'ECP7715',	'Faith', 'Greene',	'05/31/1972',	'MALE');
+Insert into  Patient Values (6003, 'ZIK8925', 'Lacey', 'Robertson',	'07/10/1944',	'FEMALE');
+Insert into  Patient Values (6004, 'ZIK8925',	'Lacey', 'Robertson',	'07/10/1944',	'FEMALE');
+
+Insert into  Surgeon Values (4001, 'General Surgery', 'Simon Frampton');
+Insert into  Surgeon Values (4002,'Cardiothoracic', 'Peri Duffy');
+Insert into  Surgeon Values (4003,'Cardiothoracic', 'Steve Renison');
+Insert into  Surgeon Values (4004,'Plastics', 'Richard Cain');
+
+Insert into  Referral Values (3501, '01/07/2015', 'GP',	'Hilary Trump',	'03/07/2015', 6001, 4001);
+Insert into  Referral Values (3502, '02/07/2015', 'GP',	'Bill Key',	'03/07/2015', 6002, 4002);
+Insert into  Referral Values (3503, '04/07/2015',	'GP',	'Donald Clinton',	'06/07/2015', 6003, 4003);
+Insert into  Referral Values (3504, '11/07/2015',	'GP', 'Donald Clinton',	'13/07/2015', 6004, 4004);
+
+Insert into  Booking Values (7001, '24/08/2015', 'Yes', 3501);
+Insert into  Booking Values (7002, '30/09/2015', 'Yes', 3502);
+Insert into  Booking Values (7003, '24/07/2015', 'Yes', 3503);
+Insert into  Booking Values (7004, '26/09/2015', 'Yes', 3504);
