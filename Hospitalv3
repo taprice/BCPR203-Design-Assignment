@@ -1,0 +1,72 @@
+-- use hospital
+
+-- Load external file into patient table
+load data local infile 'D:/data/patient.csv'
+into table patient
+fields terminated by ','
+(NHI, pFirstName, pLastName, DOB, gender);
+
+select * from patient;
+
+-- Load external file into department table
+load data local infile 'D:/data/department.csv'
+into table department
+fields terminated by ','
+(deptName);
+
+select * from department;
+
+-- Load external file into surgeon table
+load data local infile 'D:/data/surgeon.csv'
+into table surgeon
+fields terminated by ','
+(sFirstName, sLastName, deptName);
+  
+select * from surgeon;
+
+-- Load external file referral table
+load data local infile 'D:/data/referral.csv'
+into table referral
+fields terminated by ','
+(refDate, refFrom, refBy, NHI, waitlistDate, HTEligible);
+
+-- Load external file booking table
+load data local infile 'D:/data/booking.csv'
+into table booking
+fields terminated by ','
+(NHI, refDate, FSADate);
+
+
+
+/*-- Update deptId
+UPDATE Surgeon,  department 
+SET surgeon.deptId = department.deptId
+WHERE surgeon.deptName = department.deptName;
+
+update surgeon
+join department on department.deptName = surgeon.deptName
+set surgeon.deptId = department.deptId;*/
+
+-- Update age at referral table
+update referral, patient set referral.ageAtRef = TIMESTAMPDIFF(YEAR,Patient.dob,referral.refDate)
+where referral.patientId = patient.patientId;
+
+-- update refId in booking table
+update booking, referral set booking.refId = referral.refId
+where referral.NHI = booking.NHI AND referral.refDate = booking.refDate;
+
+-- Update days waiting at booking table
+update booking, referral set booking.daysWaiting = TIMESTAMPDIFF(DAY,referral.refDate, booking.FSADate)
+where booking.refId = Referral.refId;
+
+-- These columns were created to assist import data, can now be dropped
+ALTER TABLE Surgeon DROP COLUMN deptName;
+ALTER TABLE Booking DROP COLUMN refDate;
+ALTER TABLE Booking DROP COLUMN NHI;
+ALTER TABLE referral DROP COLUMN NHI;
+-- This column was created to assist import data, can now be dropped
+
+/* Patient table was created without NHI encrypted 
+to enable data to be entered. Next line of code to 
+encrypt NHI column once all data imported. */
+ALTER TABLE Patient MODIFY NHI varbinary(25);
