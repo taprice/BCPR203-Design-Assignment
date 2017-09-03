@@ -1,0 +1,70 @@
+-- create Database
+create database Hospital;
+-- Default DB
+use Hospital;
+
+-- create Patient table
+create table Patient(
+patientNo int NOT NULL AUTO_INCREMENT,
+NHI char(8),
+-- NHI varbinary(25),
+pFirstName varbinary(50),
+pLastName varbinary(60),
+DOB varbinary(30),
+gender varchar(8),
+PRIMARY KEY (patientNo)
+);
+
+-- set the auto_increment value to 3
+SET @@auto_increment_increment=3;
+
+-- create Department table
+CREATE TABLE Department (
+    deptId INT NOT NULL AUTO_INCREMENT,
+    deptName VARCHAR(20),
+    PRIMARY KEY (deptId)
+);
+
+-- create Surgeon table
+CREATE TABLE Surgeon (
+    surgeonId INT NOT NULL AUTO_INCREMENT,
+    sFirstName VARCHAR(25),
+    sLastName VARCHAR(30),
+    deptName VARCHAR(20),
+    deptId INT,
+    PRIMARY KEY (surgeonId),
+    FOREIGN KEY (deptId) REFERENCES Department (deptId)
+);
+/* Surgeon table created with deptName to allow deptId
+to be set one imported. deptName will be droped once all data imported. */
+
+CREATE TABLE Referral (
+    refId INT NOT NULL AUTO_INCREMENT,
+    refDate DATE,
+    refFrom VARCHAR(20),
+    NHI char(8),
+    refBy VARCHAR(50),
+    waitlistDate DATE,
+    patientNo INT,
+    ageAtRef INT,
+    surgeonId INT,
+    HTEligible VARCHAR(4),
+    PRIMARY KEY (refId),
+    FOREIGN KEY (patientNo) REFERENCES Patient (patientNo),
+    FOREIGN KEY (surgeonId) REFERENCES Surgeon (surgeonId)
+);
+/* Referral table was created with NHI to allow PatientId
+to be set one imported. NHI will be droped once all data imported. */
+
+CREATE TABLE Booking (
+    bookingID INT NOT NULL AUTO_INCREMENT,
+    NHI char(8),
+    refDate DATE,
+    FSADate DATE,
+    daysWaiting INT,
+    refId INT,
+    PRIMARY KEY (bookingID),
+    FOREIGN KEY (refId) REFERENCES Referral (refId)
+);
+/* Booking table was created with NHI to allow PatientId
+to be set one imported. NHI will be droped once all data imported. */
