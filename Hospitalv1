@@ -1,0 +1,73 @@
+-- create database
+create database Hospitalv1;
+-- Default DB
+use Hospitalv1;
+
+create table Patient(
+patientNo int primary key,
+nhi varchar(7),
+patientFName varchar(25),
+patientLame varchar(30),
+dob date,
+gender varchar(6)
+);
+-- Insert data
+Insert into  Patient Values (6001, 'QDX4955', 'Maggie', 'Boyle', '1979-09-12', 'FEMALE');
+Insert into  Patient Values (6002, 'ECP7715',	'Faith', 'Greene',	'1972-05-31',	'MALE');
+Insert into  Patient Values (6003, 'ZIK8925', 'Lacey', 'Robertson',	'1944-10-07',	'FEMALE');
+Insert into  Patient Values (6004, 'ZIK8925',	'Lacey', 'Robertson',	'1944-10-07',	'FEMALE');
+
+
+create table Surgeon(
+surgeonId int primary key,
+surgeonName varchar(50),
+department varchar(20)
+);
+-- Insert data
+Insert into  Surgeon Values (4001, 'General Surgery', 'Simon Frampton');
+Insert into  Surgeon Values (4002,'Cardiothoracic', 'Peri Duffy');
+Insert into  Surgeon Values (4003,'Cardiothoracic', 'Steve Renison');
+Insert into  Surgeon Values (4004,'Plastics', 'Richard Cain');
+
+
+create table Referral(
+refId int,
+refDate date,
+refFrom varchar(20),
+refBy	varchar(50),
+waitlist date,
+patientNo int,
+surgeonId int,
+-- use this for multiple PKs
+primary key (refId),
+-- foreign key
+foreign key (patientNo) references
+Patient(patientNo),
+foreign key (surgeonId) references
+Surgeon(surgeonId)
+);
+-- Insert data
+Insert into  Referral Values (3501, '2015-07-01', 'GP',	'Hilary Trump',	'2015-07-03', 6001, 4001);
+Insert into  Referral Values (3502, '2015-07-02', 'GP',	'Bill Key',	'2015-07-03', 6002, 4002);
+Insert into  Referral Values (3503, '2015-07-04',	'GP',	'Donald Clinton',	'2015-07-06', 6003, 4003);
+Insert into  Referral Values (3504, '2015-07-11',	'GP', 'Donald Clinton',	'2015-07-13', 6004, 4004);
+
+
+create table Booking(
+bookingID int,
+FSADate date,
+HTEligible varchar(3), 
+patientAgeAtReferral int,
+DaysWaiting int,
+refId int,
+-- use this for multiple PKs
+primary key (bookingID),
+-- foreign key
+foreign key (refId) references
+Referral(refId)
+);
+-- Insert data
+Insert into  Booking Values (7001, '2015-08-24', 'Yes', null, null, 3501);
+Insert into  Booking Values (7002, '2015-09-30', 'Yes', null, null, 3502);
+Insert into  Booking Values (7003, '2015-07-24', 'Yes', null, null, 3503);
+Insert into  Booking Values (7004, '2015-09-26', 'Yes', null, null, 3504);
